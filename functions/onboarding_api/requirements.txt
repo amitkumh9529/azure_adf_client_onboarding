@@ -1,0 +1,5 @@
+azure-functions
+azure-identity
+azure-mgmt-storage
+azure-storage-file-datalake
+pyodbc
