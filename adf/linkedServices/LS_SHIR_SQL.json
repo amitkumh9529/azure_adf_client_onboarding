@@ -1,0 +1,13 @@
+{
+  "name": "LS_SHIR_SQL",
+  "properties": {
+    "type": "SqlServer",
+    "connectVia": {
+      "referenceName": "SHIR_ONPREM",
+      "type": "IntegrationRuntimeReference"
+    },
+    "typeProperties": {
+      "connectionString": "Server=<ONPREM_SQL_SERVER>;Database=<SOURCE_DB>;Integrated Security=True;Encrypt=False;"
+    }
+  }
+}

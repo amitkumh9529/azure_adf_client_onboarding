@@ -1,0 +1,9 @@
+{
+  "name": "LS_AZURE_SQL",
+  "properties": {
+    "type": "AzureSqlDatabase",
+    "typeProperties": {
+      "connectionString": "Server=tcp:<SQL_SERVER>,1433;Database=<CONTROL_DB>;Authentication=Active Directory Managed Identity;Encrypt=True;"
+    }
+  }
+}

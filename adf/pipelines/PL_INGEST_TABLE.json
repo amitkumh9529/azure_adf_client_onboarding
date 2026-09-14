@@ -1,0 +1,54 @@
+{
+  "name": "PL_INGEST_TABLE",
+  "properties": {
+    "parameters": {
+      "client_id": {"type": "string"},
+      "source_id": {"type": "int"},
+      "source_type": {"type": "string"},
+      "schema_name": {"type": "string"},
+      "table_name": {"type": "string"},
+      "watermark_column": {"type": "string"},
+      "current_watermark": {"type": "string"}
+    },
+    "activities": [
+      {
+        "name": "CopySQLToRaw",
+        "type": "Copy",
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "sqlReaderQuery": {
+              "value": "SELECT * FROM @{pipeline().parameters.schema_name}.@{pipeline().parameters.table_name} WHERE (@{pipeline().parameters.watermark_column} > '@{pipeline().parameters.current_watermark}' OR '@{pipeline().parameters.current_watermark}' = '')",
+              "type": "Expression"
+            }
+          },
+          "sink": {
+            "type": "DelimitedTextSink",
+            "storeSettings": {"type": "AzureBlobFSWriteSettings"},
+            "formatSettings": {"type": "DelimitedTextWriteSettings", "fileExtension": ".csv"}
+          }
+        },
+        "inputs": [
+          {
+            "referenceName": "DS_SQL_SOURCE",
+            "type": "DatasetReference",
+            "parameters": {
+              "schema": "@pipeline().parameters.schema_name",
+              "table": "@pipeline().parameters.table_name"
+            }
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "DS_ADLS_RAW",
+            "type": "DatasetReference",
+            "parameters": {
+              "client_id": "@pipeline().parameters.client_id",
+              "source_id": "@string(pipeline().parameters.source_id)"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

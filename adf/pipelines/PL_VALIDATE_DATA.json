@@ -1,0 +1,49 @@
+{
+  "name": "PL_VALIDATE_DATA",
+  "properties": {
+    "parameters": {
+      "client_id": {"type": "string"},
+      "source_id": {"type": "int"}
+    },
+    "activities": [
+      {
+        "name": "ValidateLandingExists",
+        "type": "GetMetadata",
+        "typeProperties": {
+          "dataset": {
+            "referenceName": "DS_ADLS_RAW",
+            "type": "DatasetReference",
+            "parameters": {
+              "client_id": "@pipeline().parameters.client_id",
+              "source_id": "@string(pipeline().parameters.source_id)"
+            }
+          },
+          "fieldList": ["exists", "size"]
+        }
+      },
+      {
+        "name": "FailIfMissing",
+        "type": "IfCondition",
+        "dependsOn": [
+          {"activity": "ValidateLandingExists", "dependencyConditions": ["Succeeded"]}
+        ],
+        "typeProperties": {
+          "expression": {
+            "value": "@equals(activity('ValidateLandingExists').output.exists, false)",
+            "type": "Expression"
+          },
+          "ifTrueActivities": [
+            {
+              "name": "MissingLanding",
+              "type": "Fail",
+              "typeProperties": {
+                "message": "Expected raw landing data was not created.",
+                "errorCode": "DQ_RAW_MISSING"
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

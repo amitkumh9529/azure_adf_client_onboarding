@@ -1,0 +1,19 @@
+{
+  "name": "DS_SQL_SOURCE",
+  "properties": {
+    "parameters": {
+      "schema": {"type": "string"},
+      "table": {"type": "string"}
+    },
+    "linkedServiceName": {
+      "referenceName": "LS_SHIR_SQL",
+      "type": "LinkedServiceReference"
+    },
+    "type": "AzureSqlTable",
+    "schema": [],
+    "typeProperties": {
+      "schema": "@dataset().schema",
+      "table": "@dataset().table"
+    }
+  }
+}

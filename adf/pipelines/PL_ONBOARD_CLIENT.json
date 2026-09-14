@@ -1,0 +1,83 @@
+{
+  "name": "PL_ONBOARD_CLIENT",
+  "properties": {
+    "parameters": {
+      "client_id": {"type": "string"}
+    },
+    "activities": [
+      {
+        "name": "GetEnabledSources",
+        "type": "Lookup",
+        "typeProperties": {
+          "source": {
+            "type": "AzureSqlSource",
+            "sqlReaderQuery": {
+              "value": "EXEC control.usp_get_sources '@{pipeline().parameters.client_id}'",
+              "type": "Expression"
+            }
+          },
+          "firstRowOnly": false
+        },
+        "linkedServiceName": {
+          "referenceName": "LS_AZURE_SQL",
+          "type": "LinkedServiceReference"
+        }
+      },
+      {
+        "name": "ForEachSource",
+        "type": "ForEach",
+        "dependsOn": [
+          {"activity": "GetEnabledSources", "dependencyConditions": ["Succeeded"]}
+        ],
+        "typeProperties": {
+          "isSequential": false,
+          "batchCount": 10,
+          "items": {
+            "value": "@activity('GetEnabledSources').output.value",
+            "type": "Expression"
+          },
+          "activities": [
+            {
+              "name": "IngestSource",
+              "type": "ExecutePipeline",
+              "typeProperties": {
+                "pipeline": {
+                  "referenceName": "PL_INGEST_TABLE",
+                  "type": "PipelineReference"
+                },
+                "waitOnCompletion": true,
+                "parameters": {
+                  "client_id": "@pipeline().parameters.client_id",
+                  "source_id": "@item().source_id",
+                  "source_type": "@item().source_type",
+                  "schema_name": "@item().schema_name",
+                  "table_name": "@item().table_name",
+                  "watermark_column": "@item().watermark_column",
+                  "current_watermark": "@item().current_watermark"
+                }
+              }
+            },
+            {
+              "name": "ValidateSource",
+              "type": "ExecutePipeline",
+              "dependsOn": [
+                {"activity": "IngestSource", "dependencyConditions": ["Succeeded"]}
+              ],
+              "typeProperties": {
+                "pipeline": {
+                  "referenceName": "PL_VALIDATE_DATA",
+                  "type": "PipelineReference"
+                },
+                "waitOnCompletion": true,
+                "parameters": {
+                  "client_id": "@pipeline().parameters.client_id",
+                  "source_id": "@item().source_id"
+                }
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

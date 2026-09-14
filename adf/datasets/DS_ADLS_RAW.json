@@ -1,0 +1,26 @@
+{
+  "name": "DS_ADLS_RAW",
+  "properties": {
+    "parameters": {
+      "client_id": {"type": "string"},
+      "source_id": {"type": "string"}
+    },
+    "linkedServiceName": {
+      "referenceName": "LS_ADLS",
+      "type": "LinkedServiceReference"
+    },
+    "type": "DelimitedText",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "folderPath": {
+          "value": "@concat('client-', dataset().client_id, '/raw/source-', dataset().source_id)",
+          "type": "Expression"
+        },
+        "fileSystem": "data"
+      },
+      "columnDelimiter": ",",
+      "firstRowAsHeader": true
+    }
+  }
+}
